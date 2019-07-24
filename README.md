@@ -13,7 +13,7 @@ Filter parameters are regular expression
 
 The following enums `File` only and `FileName` matches `2019-06-28`. e.g. `ThisIsAFile2019-06-28.txt`
 
-'''powershell
+```powershell
 
 Add-Type -Path WinSCPnet.dll
 . .\SftpCommands.ps1
@@ -24,6 +24,6 @@ Download-SftpObject -HostName $SFTPServer -Username $SFTPUser -Password $SFTPPas
 
 Upload-SftpObject -HostName $SFTPServer -Username $SFTPUser -Password $SFTPPass -LocalPath "C:\Temp" -RemotePath "/somepath/test" -AcceptAllCertificate
 
-'''
+```
 
 
