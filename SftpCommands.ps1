@@ -117,3 +117,91 @@ function Enum-SftpFiles()
         try{$session.Dispose()}catch{}
     }
 }
+
+function Download-SftpObject()
+{
+    PARAM(
+        [WinSCP.Session]$Session,
+        [string]$HostName,
+        [string]$Username,
+        [string]$Password,
+        [string]$RemotePath,
+        [string]$LocalPath,
+        [switch]$AcceptAllCertificate
+    )
+    if(!$Session)
+    {
+        if(!$HostName -or !$Username -or !$Password)
+        {
+            throw "Please provide at least one of [Session] and ([HostName],[Username],[Password])"
+            return
+        }
+    }
+    $CloseSession = $false
+    if(!$Session)
+    {
+        $CloseSession = $true
+        $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
+            Protocol = [WinSCP.Protocol]::Sftp
+            HostName = $HostName
+            UserName = $Username
+            Password = $Password
+            GiveUpSecurityAndAcceptAnySshHostKey = $AcceptAllCertificate
+        }
+        $Session = New-Object WinSCP.Session
+        $Session.Open($sessionOptions)
+    }
+    $LocalPath = $LocalPath.TrimEnd("\")
+    $RemotePath = $RemotePath.TrimEnd("/")
+    $r = $Session.GetFiles($RemotePath, $LocalPath, $false)
+    if($CloseSession)
+    {
+        try{$session.Close()}catch{}
+        try{$session.Dispose()}catch{}
+    }
+    return $r
+}
+
+function Upload-SftpObject()
+{
+    PARAM(
+        [WinSCP.Session]$Session,
+        [string]$HostName,
+        [string]$Username,
+        [string]$Password,
+        [string]$LocalPath,
+        [string]$RemotePath,
+        [switch]$AcceptAllCertificate
+    )
+    if(!$Session)
+    {
+        if(!$HostName -or !$Username -or !$Password)
+        {
+            throw "Please provide at least one of [Session] and ([HostName],[Username],[Password])"
+            return
+        }
+    }
+    $CloseSession = $false
+    if(!$Session)
+    {
+        $CloseSession = $true
+        $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
+            Protocol = [WinSCP.Protocol]::Sftp
+            HostName = $HostName
+            UserName = $Username
+            Password = $Password
+            GiveUpSecurityAndAcceptAnySshHostKey = $AcceptAllCertificate
+        }
+        $Session = New-Object WinSCP.Session
+        $Session.Open($sessionOptions)
+    }
+    $LocalPath = $LocalPath.TrimEnd("\")
+    $RemotePath = $RemotePath.TrimEnd("/")
+    $r = $Session.PutFiles($LocalPath, $RemotePath, $false)
+    if($CloseSession)
+    {
+        try{$session.Close()}catch{}
+        try{$session.Dispose()}catch{}
+    }
+    return $r
+}
