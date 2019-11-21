@@ -151,9 +151,9 @@ function Download-SftpObject()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    $RemotePath = $RemotePath.TrimEnd("/")
-    $LocalPath = $LocalPath.TrimEnd("\")
-    $LocalPath = "${LocalPath}\"
+    # $RemotePath = $RemotePath.TrimEnd("/")
+    # $LocalPath = $LocalPath.TrimEnd("\")
+    # $LocalPath = "${LocalPath}\"
     $r = $Session.GetFiles($RemotePath, $LocalPath, $false)
     if($CloseSession)
     {
@@ -196,9 +196,9 @@ function Upload-SftpObject()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    $LocalPath = $LocalPath.TrimEnd("\")
-    $RemotePath = $RemotePath.TrimEnd("/")
-    $RemotePath = "${RemotePath}/"
+    # $LocalPath = $LocalPath.TrimEnd("\")
+    # $RemotePath = $RemotePath.TrimEnd("/")
+    # $RemotePath = "${RemotePath}/"
     $r = $Session.PutFiles($LocalPath, $RemotePath, $false)
     if($CloseSession)
     {
