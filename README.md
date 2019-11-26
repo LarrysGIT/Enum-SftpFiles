@@ -32,21 +32,25 @@ Close-SftpSession -Session $session
 The following enums `File` only and `FileName` matches `2019-06-28`. e.g. `ThisIsAFile2019-06-28.txt`
 
 `Filter parameters` are regular expression
+
 ```powershell
 Enum-SftpFiles -HostName $SFTPServer -Username $SFTPUser -Password $SFTPPass -RemotePath "/" -AcceptAllCertificate -Recurse -FileNameIncludeFilter "2019-06-28" -Directory:$false
 ```
 
 ### "Get/Download" objects from SFTP
+
 ```powershell
 Download-SftpObject -Session $session -RemotePath "/somepath/test" -LocalPath "C:\Temp"
 ```
 
 ### "Put/Upload" objects to SFTP
+
 ```powershell
 Upload-SftpObject -Session $session -LocalPath "C:\Temp" -RemotePath "/somepath/test"
 ```
 
 ### da da! Here is a new cmdlet recently wrote to support new requirement
+
 ```powershell
 Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Recurse -CompareSize -CompareLastWriteTime
 ```
