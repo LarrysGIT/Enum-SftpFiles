@@ -20,9 +20,9 @@ Add-Type -Path WinSCPnet.dll
 $session = New-SftpSession -HostName sftp.dns.name -Username sftpuser -Password sftppassword -AcceptAllCertificate
 ```
 
-* Create a dedicated SFTP session is suggested, although, pass username and password works too. However, initial the SFTP session is time costly. Script performance will be dragged if too many sessions open / close.
+* Create a dedicated SFTP session is suggested. Although pass username and password works too, initial the SFTP session is time costly.
 
-* Don't forget to close SFTP session.
+* Don't forget to close SFTP session like the following.
 
 ```powershell
 Close-SftpSession -Session $session
