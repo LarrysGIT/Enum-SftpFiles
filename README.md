@@ -61,7 +61,7 @@ Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Re
 
 * Q: What's the purpose of this cmdlet? A: Check the following scenario.
 
-<p>
+```
 ~ Rachael: Hey! Larry! Can you send a folder in the share to SFTP, so the team in XXX can pick it up? (XXX team is unable to access our share, just business restriction)
 ~ Me: Sure!
     Upload-SftpObject is the one, makes life easy for everyone (problem solved for now)
@@ -72,4 +72,4 @@ Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Re
 ~ Me: Sure!
     In past 2 months, the local share has been populated with a large amount of data, the Upload-SftpObject cmd copies everything, including files unchanged.
     Compare-SftpObject is the one, I use the cmdlet to get files have different size, path or last modified time. Selectively use Upload-SftpObject to upload only changed data to SFTP.
-</p>
+```
