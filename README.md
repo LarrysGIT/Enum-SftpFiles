@@ -49,27 +49,27 @@ Download-SftpObject -Session $session -RemotePath "/somepath/test" -LocalPath "C
 Upload-SftpObject -Session $session -LocalPath "C:\Temp" -RemotePath "/somepath/test"
 ```
 
-### da da! Here is a new cmdlet recently wrote to support new requirement
+### da da! Here is a new cmdlet recently wrote to support a new requirement
 
 ```powershell
 Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Recurse -CompareSize -CompareLastWriteTime
 ```
 
-* This new cmdlet allows compare contents in a local path and a remote SFTP path, by checking the path existence, size (file) and last modified time (file).
+* This new cmdlet allows script to compare contents in a local path and a remote SFTP path by checking the path existence, size (file) and last modified time (file).
 
-* Q: Why not compare files by hash? A: Need to download the data from SFTP and get the hash, time costly. For now, simply not supported.
+* Q: Why not compare files by hash? A: To do it, need to download the data from SFTP then get the hash, time costly. For now, simply not supported.
 
-* Q: What's the purpose of this cmdlet? A: Check following scenario.
+* Q: What's the purpose of this cmdlet? A: Check the following scenario.
 
-```txt
-~ Rachael: Hey! Larry! Can you send a folder in the share to SFTP, so the team in XXX can pick it up? (XXX team are not able to access our share, just business)
+```
+~ Rachael: Hey! Larry! Can you send a folder in the share to SFTP, so the team in XXX can pick it up? (XXX team is unable to access our share, just business restriction)
 ~ Me: Sure!
     Upload-SftpObject is the one, makes life easy for everyone (problem solved for now)
 
 <<<2 months passed>>>
 
-~ Rachael: Hey! Larry! The thing you setup 2 months ago works fine, but my team has found it getting slower and slower, can you take a look please?
+~ Rachael: Hey! Larry! The thing you setup 2 months ago worked, but my team has found it is getting slower and slower, can you take a look please?
 ~ Me: Sure!
-    In past 2 months, the local share has been populated with a large amount of data, the Upload-SftpObject cmd copies everything, including files not changed.
-    Compare-SftpObject is the one, I use the cmdlet to get files have different size, path or last modified time. Selectively use Upload-SftpObject to put changed data to SFTP.
+    In past 2 months, the local share has been populated with a large amount of data, the Upload-SftpObject cmd copies everything, including files unchanged.
+    Compare-SftpObject is the one, I use the cmdlet to get files have different size, path or last modified time. Selectively use Upload-SftpObject to upload only changed data to SFTP.
 ```
