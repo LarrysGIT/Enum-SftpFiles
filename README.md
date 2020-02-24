@@ -73,3 +73,25 @@ Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Re
     In past 2 months, the local share has been populated with a large amount of data, the Upload-SftpObject cmd copies everything, including files unchanged.
     Compare-SftpObject is the one, I use the cmdlet to get files have different size, path or last modified time. Selectively use Upload-SftpObject to upload only changed data to SFTP.
 ```
+
+LocalObject: Filesystem object, same from `Get-ChildItem` cmdlet
+
+RemoteObject: WinScp API defined SFTP object
+
+Result: 
+
+| Name | Meaning |
+| ---  | --- |
+| DirectoryBoth | The object is a directory, exists on both local and remote |
+| FileBoth | The object is a file, exists on both local and remote |
+| DirectoryLocal,FileRemote | The object exists on both, however, it is a directory in local and a file on remote |
+| FileLocal,DirectoryRemote | The object exists on both, however, it is a file in local and a directory on remote |
+| SameLength | The object has the same length |
+| DifferentLength | The object has different on local and remote |
+| SameLastWriteTime | The object has the same last write time |
+| DifferentLastWriteTime | The object last write time is different in local and remote |
+| LocalNewer | The object in the local has a newer last write time |
+| RemoteNewer | The object in the remote has a newer last write time |
+
+Different: `Boolean`, indicates the object local and remote are different or not
+
