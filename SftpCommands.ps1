@@ -245,6 +245,7 @@ function Compare-SftpObject()
         [switch]$CompareLastWriteTime,
         [switch]$File = $true,
         [switch]$Directory = $true,
+        [switch]$OutputDifferenceOnly,
         [switch]$AcceptAllCertificate
     )
     $LocalPath = [io.path]::GetFullPath($LocalPath) # in case relative path like "."
@@ -294,6 +295,7 @@ function Compare-SftpObject()
         [object]$LocalObject = $null
         [object]$RemoteObject = $null
         [string[]]$Result = @()
+        [bool]$Different = $false
     }
     # Direction: based on local objects, check remote objects
     $CheckedRemoteObjects = @()
@@ -329,6 +331,7 @@ function Compare-SftpObject()
                 {
                     # remote is a file
                     $ComparedObject.Result += "DirectoryLocal,FileRemote"
+                    $ComparedObject.Different = $true
                 }
             }
             else
@@ -338,6 +341,7 @@ function Compare-SftpObject()
                 {
                     # remote is a directory
                     $ComparedObject.Result = "FileLocal,DirectoryRemote"
+                    $ComparedObject.Different = $true
                 }
                 else
                 {
@@ -354,11 +358,12 @@ function Compare-SftpObject()
                         {
                             # different file length
                             $ComparedObject.Result += "DifferentLength"
+                            $ComparedObject.Different = $true
                         }
                     }
                     if($CompareLastWriteTime)
                     {
-                        if($ComparedObject.LocalObject.LastWriteTime -eq $ComparedObject.RemoteObject.LastWriteTime)
+                        if($ComparedObject.LocalObject.LastWriteTime.ToString("yyyyMMddHHmmss") -eq $ComparedObject.RemoteObject.LastWriteTime.ToString("yyyyMMddHHmmss"))
                         {
                             # same LastWriteTime
                             $ComparedObject.Result += "SameLastWriteTime"
@@ -374,6 +379,7 @@ function Compare-SftpObject()
                             {
                                 $ComparedObject.Result += "RemoteNewer"
                             }
+                            $ComparedObject.Different = $true
                         }
                     }
                 }
@@ -382,6 +388,7 @@ function Compare-SftpObject()
         else
         {
             $ComparedObject.Result += "LocalOnly"
+            $ComparedObject.Different = $true
         }
         $ComparedObject
     }
@@ -422,6 +429,7 @@ function Compare-SftpObject()
                 {
                     # remote is a file
                     $ComparedObject.Result += "DirectoryLocal,FileRemote"
+                    $ComparedObject.Different = $true
                 }
             }
             else
@@ -431,6 +439,7 @@ function Compare-SftpObject()
                 {
                     # remote is a directory
                     $ComparedObject.Result = "FileLocal,DirectoryRemote"
+                    $ComparedObject.Different = $true
                 }
                 else
                 {
@@ -447,11 +456,12 @@ function Compare-SftpObject()
                         {
                             # different file length
                             $ComparedObject.Result += "DifferentLength"
+                            $ComparedObject.Different = $true
                         }
                     }
                     if($CompareLastWriteTime)
                     {
-                        if($ComparedObject.LocalObject.LastWriteTime -eq $ComparedObject.RemoteObject.LastWriteTime)
+                        if($ComparedObject.LocalObject.LastWriteTime.ToString("yyyyMMddHHmmss") -eq $ComparedObject.RemoteObject.LastWriteTime.ToString("yyyyMMddHHmmss"))
                         {
                             # same LastWriteTime
                             $ComparedObject.Result += "SameLastWriteTime"
@@ -467,6 +477,7 @@ function Compare-SftpObject()
                             {
                                 $ComparedObject.Result += "RemoteNewer"
                             }
+                            $ComparedObject.Different = $true
                         }
                     }
                 }
@@ -475,6 +486,7 @@ function Compare-SftpObject()
         else
         {
             $ComparedObject.Result += "RemoteOnly"
+            $ComparedObject.Different = $true
         }
         $ComparedObject
     }
