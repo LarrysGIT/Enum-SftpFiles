@@ -290,6 +290,7 @@ function Compare-SftpObject()
         $localObjects = @()
     }
     $remoteObjects = Enum-SftpFiles -Session $Session -RemotePath $RemotePath -Recurse:$Recurse -File:$File -Directory:$Directory
+
     class ComparedObject
     {
         [object]$LocalObject = $null
@@ -297,6 +298,7 @@ function Compare-SftpObject()
         [string[]]$Result = @()
         [bool]$Different = $false
     }
+
     # Direction: based on local objects, check remote objects
     $CheckedRemoteObjects = @()
     foreach($localobject in $localObjects)
@@ -494,5 +496,90 @@ function Compare-SftpObject()
     {
         try{$session.Close()}catch{}
         try{$session.Dispose()}catch{}
+    }
+}
+
+function Give-SftpCopySuggestion
+{
+    PARAM(
+        [object[]]$CompareResults
+    )
+    class CopySuggestion
+    {
+        [object]$LocalObject = $null
+        [object]$RemoteObject = $null
+        [string]$Direction = $null
+        [string]$Type = $null
+    }
+    # objects in local but not remote, no need to copy everything
+    $LocalOnlys = $CompareResults | ?{$_.Result -imatch "LocalOnly"} | Sort-Object -Property @{E = {$_.LocalObject.FullName}}
+    for($i = 0; $i -lt $LocalOnlys.Count; $i++)
+    {
+        if(!$LocalOnlys[$i]){continue}
+        for($j = $i + 1; $j -lt $LocalOnlys.Count; $j++)
+        {
+            if($LocalOnlys[$j].LocalObject.FullName -like "$($LocalOnlys[$i].LocalObject.FullName)\*")
+            {
+                $LocalOnlys[$j] = $null
+            }
+        }
+        $CopySuggestion = New-Object CopySuggestion
+        $CopySuggestion.LocalObject = $LocalOnlys[$i].LocalObject
+        $CopySuggestion.RemoteObject = $LocalOnlys[$i].RemoteObject
+        $CopySuggestion.Direction = "LocalToRemote"
+        $CopySuggestion.Type = "New"
+        $CopySuggestion
+    }
+    # objects in remote but not local, no need to copy everything
+    $RemoteOnlys = $CompareResults | ?{$_.Result -imatch "RemoteOnly"} | Sort-Object -Property @{E = {$_.RemoteObject.FullName}}
+    for($i = 0; $i -lt $RemoteOnlys.Count; $i++)
+    {
+        if(!$RemoteOnlys[$i]){continue}
+        for($j = $i + 1; $j -lt $RemoteOnlys.Count; $j++)
+        {
+            if($RemoteOnlys[$j].RemoteObject.FullName -like "$($RemoteOnlys[$i].RemoteObject.FullName)\*")
+            {
+                $RemoteOnlys[$j] = $null
+            }
+        }
+        $CopySuggestion = New-Object CopySuggestion
+        $CopySuggestion.LocalObject = $RemoteOnlys[$i].LocalObject
+        $CopySuggestion.RemoteObject = $RemoteOnlys[$i].RemoteObject
+        $CopySuggestion.Direction = "RemoteToLocal"
+        $CopySuggestion.Type = "New"
+        $CopySuggestion
+    }
+    # objects in local is newer
+    $LocalNewers = $CompareResults | ?{$_.Result -imatch "LocalNewer"}
+    for($i = 0; $i -lt $LocalNewers.Count; $i++)
+    {
+        $CopySuggestion = New-Object CopySuggestion
+        $CopySuggestion.LocalObject = $LocalNewers[$i].LocalObject
+        $CopySuggestion.RemoteObject = $LocalNewers[$i].RemoteObject
+        $CopySuggestion.Direction = "LocalToRemote"
+        $CopySuggestion.Type = "NewerOverwrite"
+        $CopySuggestion
+    }
+    # objects in remote is newer
+    $RemoteNewers = $CompareResults | ?{$_.Result -imatch "RemoteNewer"}
+    for($i = 0; $i -lt $LocalNewers.Count; $i++)
+    {
+        $CopySuggestion = New-Object CopySuggestion
+        $CopySuggestion.LocalObject = $LocalNewers[$i].LocalObject
+        $CopySuggestion.RemoteObject = $LocalNewers[$i].RemoteObject
+        $CopySuggestion.Direction = "RemoteToLocal"
+        $CopySuggestion.Type = "NewerOverwrite"
+        $CopySuggestion
+    }
+    # objects exist in both local and remote, however, one is file, another is directory
+    $UnableToGiveSuggestions = $CompareResults | ?{$_.Result -imatch "DirectoryLocal,FileRemote|FileLocal,DirectoryRemote"}
+    for($i = 0; $i -lt $UnableToGiveSuggestions.Count; $i++)
+    {
+        $CopySuggestion = New-Object CopySuggestion
+        $CopySuggestion.LocalObject = $LocalNewers[$i].LocalObject
+        $CopySuggestion.RemoteObject = $LocalNewers[$i].RemoteObject
+        $CopySuggestion.Direction = "UnableToGiveSuggestion"
+        $CopySuggestion.Type = "UnableToGiveSuggestion"
+        $CopySuggestion
     }
 }

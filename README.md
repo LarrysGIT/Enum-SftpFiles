@@ -80,8 +80,10 @@ RemoteObject: WinScp API defined SFTP object
 
 Result: 
 
-| Name | Meaning |
+| Name | Explaination |
 | ---  | --- |
+| LocalOnly | The object exists in local only |
+| RemoteOnly | The object exists in remote only |
 | DirectoryBoth | The object is a directory, exists on both local and remote |
 | FileBoth | The object is a file, exists on both local and remote |
 | DirectoryLocal,FileRemote | The object exists on both, however, it is a directory in local and a file on remote |
@@ -93,5 +95,28 @@ Result:
 | LocalNewer | The object in the local has a newer last write time |
 | RemoteNewer | The object in the remote has a newer last write time |
 
-Different: `Boolean`, indicates the object local and remote are different or not
+Different: `Boolean`, an overall value indicates the object local and remote are different or not
 
+### `Give-SftpCopySuggestion`
+
+Accept the results from `Compare-SftpObject`, give suggestions to sync up local and remote
+
+The example following indicates you should upload the localobject to remote to sync up
+
+```powershell
+$compares = Compare-SftpObject -Session $session -LocalPath $localPath -RemotePath $remotePath -Recurse -CompareSize -CompareLastWriteTime
+Give-SftpCopySuggestion -CompareResults $compares
+
+LocalObject RemoteObject Direction     Type
+----------- ------------ ---------     ----
+testdir1                 LocalToRemote New 
+
+```
+
+| Direction | Type | Explaination |
+| --- | --- | --- |
+| LocalToRemote | New | The object exists in local but not remote, should copy from local to remote |
+| RemoteToLocal | New | The object exists in remote but not local, should copy from local to remote |
+| LocalToRemote | NewerOverwrite | The object exists both local and remote, local is newer, should copy and overwrite remote |
+| RemoteToLocal | NewerOverwrite | The object exists both remote and local, remote is newer, should copy and overwrite local |
+| UnableToGiveSuggestion | UnableToGiveSuggestion | The object exists both local and remote, but different type, one a file, another is directory, you need to delete one first |
