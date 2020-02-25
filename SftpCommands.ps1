@@ -249,8 +249,10 @@ function Compare-SftpObject()
         [switch]$AcceptAllCertificate
     )
     $LocalPath = [io.path]::GetFullPath($LocalPath) # in case relative path like "."
-    $LocalPath = $LocalPath -ireplace "\\$", "\"
-    $RemotePath = $RemotePath -ireplace "/$", "/"
+    $LocalPath = $LocalPath -ireplace "\\$"
+    if($RemotePath -ne "/"){
+        $RemotePath = $RemotePath -ireplace "/$"
+    }
     if(!$Session)
     {
         if(!$HostName -or !$Username -or !$Password)
@@ -306,11 +308,11 @@ function Compare-SftpObject()
         $ComparedObject = New-Object ComparedObject
         $ComparedObject.LocalObject = $localobject
         $matched = $false
-        $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).TrimStart("\")
+        $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).TrimStart("\").Replace("\\", "\")
+        $localobjectMappedToRemote = "$RemotePath/$($localobjectFullName_Relative.Replace('\', '/'))".Replace("//", "/")
         foreach($remoteobject in $remoteObjects)
         {
-            $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).TrimStart("/").Replace("/", "\")
-            if($localobjectFullName_Relative -eq $remoteobjectFullName_Relative)
+            if($remoteobject.FullName -eq $localobjectMappedToRemote)
             {
                 # local and remote objects have the same relative path
                 $matched = $true
@@ -390,6 +392,7 @@ function Compare-SftpObject()
         else
         {
             $ComparedObject.Result += "LocalOnly"
+            $ComparedObject.RemoteObject = $localobjectMappedToRemote
             $ComparedObject.Different = $true
         }
         $ComparedObject
@@ -405,11 +408,11 @@ function Compare-SftpObject()
         $ComparedObject = New-Object ComparedObject
         $ComparedObject.RemoteObject = $remoteobject
         $matched = $false
-        $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).TrimStart("/")
+        $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).TrimStart("/").Replace("//", "/")
+        $remoteobjectMappedToLocal = "$LocalPath\$($remoteobjectFullName_Relative.Replace('/', '\'))".Replace("//", "/")
         foreach($localobject in $LocalObjects)
         {
-            $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).TrimStart("\").Replace("\", "/")
-            if($localobjectFullName_Relative -eq $remoteobjectFullName_Relative)
+            if($localobject.FullName -eq $remoteobjectMappedToLocal)
             {
                 # local and remote objects have the same relative path
                 $matched = $true
@@ -488,6 +491,7 @@ function Compare-SftpObject()
         else
         {
             $ComparedObject.Result += "RemoteOnly"
+            $ComparedObject.LocalObject = $remoteobjectMappedToLocal
             $ComparedObject.Different = $true
         }
         $ComparedObject
@@ -562,11 +566,11 @@ function Give-SftpCopySuggestion
     }
     # objects in remote is newer
     $RemoteNewers = $CompareResults | ?{$_.Result -imatch "RemoteNewer"}
-    for($i = 0; $i -lt $LocalNewers.Count; $i++)
+    for($i = 0; $i -lt $RemoteNewers.Count; $i++)
     {
         $CopySuggestion = New-Object CopySuggestion
-        $CopySuggestion.LocalObject = $LocalNewers[$i].LocalObject
-        $CopySuggestion.RemoteObject = $LocalNewers[$i].RemoteObject
+        $CopySuggestion.LocalObject = $RemoteNewers[$i].LocalObject
+        $CopySuggestion.RemoteObject = $RemoteNewers[$i].RemoteObject
         $CopySuggestion.Direction = "RemoteToLocal"
         $CopySuggestion.Type = "NewerOverwrite"
         $CopySuggestion
