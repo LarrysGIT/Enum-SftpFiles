@@ -246,7 +246,9 @@ function Compare-SftpObject()
         [switch]$File = $true,
         [switch]$Directory = $true,
         [switch]$OutputDifferenceOnly,
-        [switch]$AcceptAllCertificate
+        [switch]$AcceptAllCertificate,
+        [object[]]$remoteObjects,
+        [object[]]$localObjects
     )
     $LocalPath = [io.path]::GetFullPath($LocalPath) # in case relative path like "."
     $LocalPath = $LocalPath -ireplace "\\$"
@@ -275,23 +277,29 @@ function Compare-SftpObject()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    if($File -and $Directory)
+    if(!$localObjects)
     {
-        $localObjects = Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force
+        if($File -and $Directory)
+        {
+            $localObjects = Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force
+        }
+        elseif($File -and !$Directory)
+        {
+            $localObjects = Get-ChildItem -Path $LocalPath -File -Recurse:$Recurse -Force
+        }
+        elseif(!$File -and $Directory)
+        {
+            $localObjects = Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force
+        }
+        else
+        {
+            $localObjects = @()
+        }
     }
-    elseif($File -and !$Directory)
+    if(!$remoteObjects)
     {
-        $localObjects = Get-ChildItem -Path $LocalPath -File -Recurse:$Recurse -Force
+        $remoteObjects = Enum-SftpFiles -Session $Session -RemotePath $RemotePath -Recurse:$Recurse -File:$File -Directory:$Directory
     }
-    elseif(!$File -and $Directory)
-    {
-        $localObjects = Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force
-    }
-    else
-    {
-        $localObjects = @()
-    }
-    $remoteObjects = Enum-SftpFiles -Session $Session -RemotePath $RemotePath -Recurse:$Recurse -File:$File -Directory:$Directory
 
     class ComparedObject
     {
