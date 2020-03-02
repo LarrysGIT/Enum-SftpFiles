@@ -621,7 +621,7 @@ function Move-SftpObject
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    $r = $Session.MoveFile($RemotePath, $RemotePathDestination)
+    $r = $Session.MoveFile($RemotePathSource, $RemotePathDestination)
     if($CloseSession)
     {
         try{$session.Close()}catch{}
