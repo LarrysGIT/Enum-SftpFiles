@@ -587,3 +587,45 @@ function Give-SftpCopySuggestion
         $CopySuggestion
     }
 }
+
+function Move-SftpObject
+{
+    PARAM(
+        [WinSCP.Session]$Session,
+        [string]$HostName,
+        [string]$Username,
+        [string]$Password,
+        [string]$RemotePathSource,
+        [string]$RemotePathDestination,
+        [switch]$AcceptAllCertificate
+    )
+    if(!$Session)
+    {
+        if(!$HostName -or !$Username -or !$Password)
+        {
+            throw "Please provide at least one of [Session] and ([HostName],[Username],[Password])"
+            return
+        }
+    }
+    $CloseSession = $false
+    if(!$Session)
+    {
+        $CloseSession = $true
+        $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
+            Protocol = [WinSCP.Protocol]::Sftp
+            HostName = $HostName
+            UserName = $Username
+            Password = $Password
+            GiveUpSecurityAndAcceptAnySshHostKey = $AcceptAllCertificate
+        }
+        $Session = New-Object WinSCP.Session
+        $Session.Open($sessionOptions)
+    }
+    $r = $Session.MoveFile($RemotePath, $RemotePathDestination)
+    if($CloseSession)
+    {
+        try{$session.Close()}catch{}
+        try{$session.Dispose()}catch{}
+    }
+    return $r
+}
