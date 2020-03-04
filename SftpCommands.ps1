@@ -47,14 +47,8 @@ function Enum-SftpFiles()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    if($Session.FileExists($RemotePath))
-    {
-        $fs_objects = $Session.ListDirectory($RemotePath)
-    }
-    else
-    {
-        $fs_objects = @()
-    }
+
+    $fs_objects = $Session.ListDirectory($RemotePath)
     foreach($f in $fs_objects.Files)
     {
         if($f.IsThisDirectory -or $f.IsParentDirectory){continue}
@@ -283,7 +277,7 @@ function Compare-SftpObject()
     }
     if($File -and $Directory)
     {
-        $localObjects = @(Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force) + @(Get-Item -Path $LocalPath)
+        $localObjects = Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force
     }
     elseif($File -and !$Directory)
     {
@@ -291,7 +285,7 @@ function Compare-SftpObject()
     }
     elseif(!$File -and $Directory)
     {
-        $localObjects = @(Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force) + @(Get-Item -Path $LocalPath)
+        $localObjects = Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force
     }
     else
     {
@@ -315,10 +309,10 @@ function Compare-SftpObject()
         $ComparedObject.LocalObject = $localobject
         $matched = $false
         $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).TrimStart("\").Replace("\\", "\")
-        $localobjectMappedToRemote = New-Object -TypeName PSObject -Property @{"FullName" = "$RemotePath/$($localobjectFullName_Relative.Replace('\', '/'))".Replace("//", "/")}
+        $localobjectMappedToRemote = "$RemotePath/$($localobjectFullName_Relative.Replace('\', '/'))".Replace("//", "/")
         foreach($remoteobject in $remoteObjects)
         {
-            if($remoteobject.FullName -eq $localobjectMappedToRemote.FullName)
+            if($remoteobject.FullName -eq $localobjectMappedToRemote)
             {
                 # local and remote objects have the same relative path
                 $matched = $true
@@ -415,10 +409,10 @@ function Compare-SftpObject()
         $ComparedObject.RemoteObject = $remoteobject
         $matched = $false
         $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).TrimStart("/").Replace("//", "/")
-        $remoteobjectMappedToLocal = New-Object -TypeName PSObject -Property @{"FullName" = "$LocalPath\$($remoteobjectFullName_Relative.Replace('/', '\'))".Replace("//", "/")}
+        $remoteobjectMappedToLocal = "$LocalPath\$($remoteobjectFullName_Relative.Replace('/', '\'))".Replace("//", "/")
         foreach($localobject in $LocalObjects)
         {
-            if($localobject.FullName -eq $remoteobjectMappedToLocal.FullName)
+            if($localobject.FullName -eq $remoteobjectMappedToLocal)
             {
                 # local and remote objects have the same relative path
                 $matched = $true
