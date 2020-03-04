@@ -283,7 +283,7 @@ function Compare-SftpObject()
     }
     if($File -and $Directory)
     {
-        $localObjects = @(Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force) + (Get-Item -Path $LocalPath)
+        $localObjects = Get-ChildItem -Path $LocalPath -Recurse:$Recurse -Force
     }
     elseif($File -and !$Directory)
     {
@@ -291,7 +291,7 @@ function Compare-SftpObject()
     }
     elseif(!$File -and $Directory)
     {
-        $localObjects = @(Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force) + (Get-Item -Path $LocalPath)
+        $localObjects = Get-ChildItem -Path $LocalPath -Directory -Recurse:$Recurse -Force
     }
     else
     {
@@ -314,8 +314,8 @@ function Compare-SftpObject()
         $ComparedObject = New-Object ComparedObject
         $ComparedObject.LocalObject = $localobject
         $matched = $false
-        $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).Trim("\").Replace("\\", "\")
-        $localobjectMappedToRemote = New-Object -TypeName PSObject -Property @{"FullName" = "$RemotePath/$($localobjectFullName_Relative.Replace('\', '/'))".Replace("//", "/").TrimEnd("/")}
+        $localobjectFullName_Relative = $localobject.FullName.Remove(0, $LocalPath.Length).TrimStart("\").Replace("\\", "\")
+        $localobjectMappedToRemote = New-Object -TypeName PSObject -Property @{"FullName" = "$RemotePath/$($localobjectFullName_Relative.Replace('\', '/'))".Replace("//", "/")}
         foreach($remoteobject in $remoteObjects)
         {
             if($remoteobject.FullName -eq $localobjectMappedToRemote.FullName)
@@ -414,8 +414,8 @@ function Compare-SftpObject()
         $ComparedObject = New-Object ComparedObject
         $ComparedObject.RemoteObject = $remoteobject
         $matched = $false
-        $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).Trim("/").Replace("//", "/")
-        $remoteobjectMappedToLocal = New-Object -TypeName PSObject -Property @{"FullName" = "$LocalPath\$($remoteobjectFullName_Relative.Replace('/', '\'))".Replace("//", "/").TrimEnd("/")}
+        $remoteobjectFullName_Relative = $remoteobject.FullName.Remove(0, $RemotePath.Length).TrimStart("/").Replace("//", "/")
+        $remoteobjectMappedToLocal = New-Object -TypeName PSObject -Property @{"FullName" = "$LocalPath\$($remoteobjectFullName_Relative.Replace('/', '\'))".Replace("//", "/")}
         foreach($localobject in $LocalObjects)
         {
             if($localobject.FullName -eq $remoteobjectMappedToLocal.FullName)
