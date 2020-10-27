@@ -133,7 +133,8 @@ function Download-SftpObject()
         [string]$Password,
         [string]$RemotePath,
         [string]$LocalPath,
-        [switch]$AcceptAllCertificate
+        [switch]$AcceptAllCertificate,
+        [WinSCP.TransferOptions]$TransferOptions
     )
     if(!$Session)
     {
@@ -157,7 +158,7 @@ function Download-SftpObject()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    $r = $Session.GetFiles($RemotePath, $LocalPath, $false)
+    $r = $Session.GetFiles($RemotePath, $LocalPath, $false, $TransferOptions)
     if($CloseSession)
     {
         try{$session.Close()}catch{}
@@ -175,7 +176,8 @@ function Upload-SftpObject()
         [string]$Password,
         [string]$LocalPath,
         [string]$RemotePath,
-        [switch]$AcceptAllCertificate
+        [switch]$AcceptAllCertificate,
+        [WinSCP.TransferOptions]$TransferOptions
     )
     if(!$Session)
     {
@@ -199,7 +201,7 @@ function Upload-SftpObject()
         $Session = New-Object WinSCP.Session
         $Session.Open($sessionOptions)
     }
-    $r = $Session.PutFiles($LocalPath, $RemotePath, $false)
+    $r = $Session.PutFiles($LocalPath, $RemotePath, $false, $TransferOptions)
     if($CloseSession)
     {
         try{$session.Close()}catch{}
