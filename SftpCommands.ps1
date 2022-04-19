@@ -511,3 +511,5 @@ function Move-SftpObject
     $r = $Session.MoveFile($RemotePathSource, $RemotePathDestination)
     return $r
 }
+
+Add-Type -Path "$PSScriptRoot\WinSCP_API_Sample\WinSCPnet.dll"
