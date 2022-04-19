@@ -1,17 +1,15 @@
 # Enum-SftpFiles
 Cmdlets to handle local file and sftp
 
-# https://winscp.net/eng/docs/library
-Download the API DLL from above url
+# Import the DLL from the repo before invoke the cmdlet
+This wrap-up script is built based on the given version of WinScp.
 
-Import the DLL before invoke the cmdlet
-
-`Add-Type -Path WinSCPnet.dll`
+`Add-Type -Path .\WinSCP_API_Sample\WinSCPnet.dll`
 
 # Examples
 ### Import commands
 ```powershell
-Add-Type -Path WinSCPnet.dll
+Add-Type -Path .\WinSCP_API_Sample\WinSCPnet.dll
 . .\SftpCommands.ps1
 ```
 
@@ -19,8 +17,6 @@ Add-Type -Path WinSCPnet.dll
 ```powershell
 $session = New-SftpSession -HostName sftp.dns.name -Username sftpuser -Password sftppassword -AcceptAllCertificate
 ```
-
-* Create a dedicated SFTP session is suggested. Although pass username and password works too, initial the SFTP session is time costly.
 
 * Don't forget to close SFTP session like the following.
 
@@ -34,7 +30,7 @@ The following enums `File` only and `FileName` matches `2019-06-28`. e.g. `ThisI
 `Filter parameters` are regular expression
 
 ```powershell
-Enum-SftpFiles -HostName $SFTPServer -Username $SFTPUser -Password $SFTPPass -RemotePath "/" -AcceptAllCertificate -Recurse -FileNameIncludeFilter "2019-06-28" -Directory:$false
+Enum-SftpFiles -HostName $SFTPServer -Session $session -RemotePath "/" -AcceptAllCertificate -Recurse -FileNameIncludeFilter "2019-06-28" -Directory:$false
 ```
 
 ### "Get/Download" objects from SFTP
@@ -58,21 +54,6 @@ Compare-SftpObject -Session $session -LocalPath .\ -RemotePath "/remotepath" -Re
 * This new cmdlet allows script to compare contents in a local path and a remote SFTP path by checking the path existence, size (file) and last modified time (file).
 
 * Q: Why not compare files by hash? A: To do it, need to download the data from SFTP then get the hash, time costly. For now, simply not supported.
-
-* Q: What's the purpose of this cmdlet? A: Check the following scenario.
-
-```
-~ Rachael: Hey! Larry! Can you send a folder in the share to SFTP, so the team in XXX can pick it up? (XXX team is unable to access our share, just business restriction)
-~ Me: Sure!
-    Upload-SftpObject is the one, makes life easy for everyone (problem solved for now)
-
-<<<2 months passed>>>
-
-~ Rachael: Hey! Larry! The thing you setup 2 months ago worked, but my team has found it is getting slower and slower, can you take a look please?
-~ Me: Sure!
-    In past 2 months, the local share has been populated with a large amount of data, the Upload-SftpObject cmd copies everything, including files unchanged.
-    Compare-SftpObject is the one, I use the cmdlet to get files have different size, path or last modified time. Selectively use Upload-SftpObject to upload only changed data to SFTP.
-```
 
 LocalObject: Filesystem object, same from `Get-ChildItem` cmdlet
 
