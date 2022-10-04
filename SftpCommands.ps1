@@ -512,4 +512,19 @@ function Move-SftpObject
     return $r
 }
 
+function Delete-SftpObject()
+{
+    PARAM(
+        [WinSCP.Session]$Session,
+        [string]$RemotePath
+    )
+    if(!$Session)
+    {
+        throw "Please provide [Session], use New-SftpSession to generate one."
+        return
+    }
+    $r = $s.RemoveFiles($RemotePath)
+    return $r
+}
+
 Add-Type -Path "$PSScriptRoot\WinSCP_API_Sample\WinSCPnet.dll"
