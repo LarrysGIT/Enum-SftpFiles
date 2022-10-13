@@ -523,7 +523,7 @@ function Delete-SftpObject()
         throw "Please provide [Session], use New-SftpSession to generate one."
         return
     }
-    $r = $s.RemoveFiles($RemotePath)
+    $r = $Session.RemoveFiles($RemotePath)
     return $r
 }
 
