@@ -1,6 +1,7 @@
 
 # Download API lib from https://winscp.net/eng/docs/library
 # Add-Type -Path WinSCPnet.dll
+Add-Type -Path "$PSScriptRoot\WinSCP_API_Sample\WinSCPnet.dll"
 
 function Enum-SftpFiles()
 {
