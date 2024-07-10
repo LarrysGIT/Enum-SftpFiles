@@ -141,7 +141,8 @@ function New-SftpSession()
         [string]$Password,
         [string]$SshPrivateKeyPath,
         [string]$SshPrivateKeyPassphrase,
-        [switch]$AcceptAllCertificate
+        [switch]$AcceptAllCertificate,
+        [int]$TimeoutInSec = 60
     )
     $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
         Protocol = [WinSCP.Protocol]::Sftp
@@ -151,6 +152,7 @@ function New-SftpSession()
         SshPrivateKeyPath = $SshPrivateKeyPath
         SshPrivateKeyPassphrase = $SshPrivateKeyPassphrase
         GiveUpSecurityAndAcceptAnySshHostKey = $AcceptAllCertificate
+        Timeout = [timespan]::new(0, 0, $TimeoutInSec)
     }
     $Session = New-Object WinSCP.Session
     $Session.Open($sessionOptions)
