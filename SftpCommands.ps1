@@ -147,13 +147,13 @@ function New-SftpSession()
     $sessionOptions = New-Object WinSCP.SessionOptions -Property @{
         Protocol = [WinSCP.Protocol]::Sftp
         HostName = $HostName
-        UserName = $Username
-        Password = $Password
-        SshPrivateKeyPath = $SshPrivateKeyPath
-        SshPrivateKeyPassphrase = $SshPrivateKeyPassphrase
         GiveUpSecurityAndAcceptAnySshHostKey = $AcceptAllCertificate
         Timeout = [timespan]::new(0, 0, $TimeoutInSec)
     }
+    if($Username){$sessionOptions.UserName = $Username}
+    if($Password){$sessionOptions.Password = $Password}
+    if($SshPrivateKeyPath){$sessionOptions.SshPrivateKeyPath = $SshPrivateKeyPath}
+    if($SshPrivateKeyPassphrase){$sessionOptions.SshPrivateKeyPassphrase = $SshPrivateKeyPassphrase}
     $Session = New-Object WinSCP.Session
     $Session.Open($sessionOptions)
     return $Session
