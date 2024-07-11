@@ -529,5 +529,3 @@ function Delete-SftpObject()
     $r = $Session.RemoveFiles($RemotePath)
     return $r
 }
-
-Add-Type -Path "$PSScriptRoot\WinSCP_API_Sample\WinSCPnet.dll"
